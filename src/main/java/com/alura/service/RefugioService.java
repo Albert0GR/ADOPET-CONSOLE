@@ -2,11 +2,8 @@ package com.alura.service;
 
 import com.alura.client.ClientHttpConfiguration;
 import com.alura.domain.Refugio;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 import java.io.IOException;
 import java.net.http.HttpResponse;
@@ -27,17 +24,23 @@ public class RefugioService {
         HttpResponse<String> response = client.dispararRequestGet(uri);
         String responseBody = response.body();
         //JsonArray jsonArray = JsonParser.parseString(responseBody).getAsJsonArray();
-        Refugio[] refugios = new ObjectMapper().readValue(responseBody,Refugio[].class);
+        ObjectMapper objectMapper = new ObjectMapper().enable(JsonParser.Feature.INCLUDE_SOURCE_IN_LOCATION);
+        Refugio[] refugios = objectMapper.readValue(responseBody,Refugio[].class);
         //lista de refugios
         List<Refugio> refugioList = Arrays.stream(refugios).toList();
-        System.out.println("Refugios registrados:");
-        for (Refugio refugio : refugioList) {
-            //JsonObject jsonObject = element.getAsJsonObject(); ya no se ocupa
-            //long id = jsonObject.get("id").getAsLong();
-            long id = refugio.getId();
-            String nombre = refugio.getNombre();
-            System.out.println(id + " - " + nombre);
+        if (refugioList.isEmpty()){
+            System.out.println("No hay refugios registrados");
+        } else {
+            System.out.println("Refugios registrados:");
+            for (Refugio refugio : refugioList) {
+                //JsonObject jsonObject = element.getAsJsonObject(); ya no se ocupa
+                //long id = jsonObject.get("id").getAsLong();
+                long id = refugio.getId();
+                String nombre = refugio.getNombre();
+                System.out.println(id + " - " + nombre);
+            }
         }
+
     }
 
     public void registrarRefugio() throws IOException, InterruptedException {
@@ -48,15 +51,10 @@ public class RefugioService {
         System.out.println("Escriba el email del refugio:");
         String email = new Scanner(System.in).nextLine();
 
-        //JsonObject json = new JsonObject();
-        //json.addProperty("nombre", nombre);
-        //json.addProperty("telefono", telefono);
-        //json.addProperty("email", email);
         Refugio refugio = new Refugio(nombre, telefono, email);
 
 
         String uri = "http://localhost:8080/refugios";
-        //HttpResponse<String> response = client.dispararRequestPost(uri, json);
         HttpResponse<String> response = client.dispararRequestPost(uri, refugio);
         int statusCode = response.statusCode();
         String responseBody = response.body();

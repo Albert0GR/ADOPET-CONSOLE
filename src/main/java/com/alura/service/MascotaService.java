@@ -2,11 +2,8 @@ package com.alura.service;
 
 import com.alura.client.ClientHttpConfiguration;
 import com.alura.domain.Mascota;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -35,7 +32,8 @@ public class MascotaService {
             System.out.println("ID o nombre no registrado!");
         }
         String responseBody = response.body();
-        Mascota[] mascotas = new ObjectMapper().readValue(responseBody, Mascota[].class);
+        ObjectMapper objectMapper = new ObjectMapper().enable(JsonParser.Feature.INCLUDE_SOURCE_IN_LOCATION);
+        Mascota[] mascotas = objectMapper.readValue(responseBody, Mascota[].class);
         List<Mascota> mascotaList = Arrays.stream(mascotas).toList();
         System.out.println("Mascotas registradas:");
         for (Mascota mascota : mascotaList) {
